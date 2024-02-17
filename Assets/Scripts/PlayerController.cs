@@ -1,88 +1,88 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class PlayerController : MonoBehaviour
+
+public class PlayerMovement2D : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float baseMoveSpeed = 5f; // Add a base speed for reset purposes
-    public float jumpForce = 15f;
-    public float speedBoostAmount = 1.5f;
-    public int maxSpeedBoosts = 5;
-    private int currentSpeedBoosts = 0;
-    private Rigidbody2D rb;
+    public float acceleration = 10f;
+    public float maxSpeed = 5f;
+    public float sprintMultiplier = 1.5f;
+    public float jumpForce = 5f;
+    public float bhopMultiplier = 1.1f;
+    private float currentSpeedMultiplier = 1f;
     private bool isGrounded;
-    private AudioSource audioSource;
-    public AudioClip jumpSound;
-    private float lastJumpTime;
-    private SpriteRenderer spriteRenderer;
-    private Color originalColor;
-    public float bhopWindow = 0.2f; // Window of time to hit jump again for bhop
-    private float lastGroundedTime; // Track the last time player was grounded
+
+    private Rigidbody2D rb;
+    private float movementInput;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        audioSource = GetComponent<AudioSource>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        originalColor = spriteRenderer.color;
     }
 
     void Update()
     {
-        Move();
-        // Adjust jump check to consider last grounded time within bhop window
-        if (Input.GetButtonDown("Jump") && (Time.time - lastGroundedTime <= bhopWindow))
+        // Check if the player is on the ground
+        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1.1f, LayerMask.GetMask("Ground"));
+
+        // Get horizontal movement input
+        movementInput = Input.GetAxisRaw("Horizontal");
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             Jump();
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            currentSpeedMultiplier = sprintMultiplier;
+        }
+        else
+        {
+            currentSpeedMultiplier = 1f;
+        }
+
+        // Reset speed multiplier when grounded without jumping
+        if (isGrounded && !Input.GetKeyDown(KeyCode.Space))
+        {
+            currentSpeedMultiplier = 1f;
         }
     }
 
     void FixedUpdate()
     {
-        // Ground check moved to FixedUpdate for physics accuracy
-        isGrounded = Physics2D.OverlapCircle(transform.position, 0.1f, LayerMask.GetMask("Ground"));
-        if (isGrounded)
-        {
-            lastGroundedTime = Time.time;
-            if (currentSpeedBoosts > 0 && Time.time - lastJumpTime > bhopWindow)
-            {
-                // Player missed the bhop window; reset speed boost count but keep the current speed
-                currentSpeedBoosts = 0;
-            }
-        }
+        MovePlayer(movementInput);
     }
 
-    void Move()
+    void MovePlayer(float direction)
     {
-        float moveInput = Input.GetAxis("Horizontal");
-        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+        if (Mathf.Abs(rb.velocity.x) < maxSpeed * currentSpeedMultiplier)
+        {
+            rb.AddForce(new Vector2(direction * acceleration, 0f), ForceMode2D.Force);
+        }
+
+        // Implement momentum by limiting speed only when above maxSpeed
+        if (Mathf.Abs(rb.velocity.x) > maxSpeed * currentSpeedMultiplier)
+        {
+            rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed * currentSpeedMultiplier, rb.velocity.y);
+        }
     }
 
     void Jump()
     {
-        rb.velocity = new Vector2(rb.velocity.x, jumpForce); // Use velocity change for more consistent jump
-        if (currentSpeedBoosts < maxSpeedBoosts && isGrounded)
+        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        
+        if (currentSpeedMultiplier > 1f)
         {
-            moveSpeed = Mathf.Min(moveSpeed + speedBoostAmount, baseMoveSpeed + speedBoostAmount * maxSpeedBoosts);
-            currentSpeedBoosts++;
-            audioSource.pitch = 1.0f + 0.1f * currentSpeedBoosts;
-            audioSource.PlayOneShot(jumpSound);
-            UpdateVisualCue();
+            // Increase speed multiplier on successful bhop
+            currentSpeedMultiplier *= bhopMultiplier;
+            // Ensure the speed multiplier doesn't exceed a maximum threshold to prevent unlimited acceleration
+            currentSpeedMultiplier = Mathf.Min(currentSpeedMultiplier, sprintMultiplier * 2);
         }
-        lastJumpTime = Time.time; // Update the last jump time
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
+        else
         {
-            spriteRenderer.color = originalColor; // Ensure color reset happens here
+            // Initial speed boost on first jump
+            currentSpeedMultiplier = sprintMultiplier;
         }
-    }
-
-    void UpdateVisualCue()
-    {
-        float intensity = 0.1f * currentSpeedBoosts;
-        spriteRenderer.color = Color.Lerp(originalColor, Color.blue, intensity);
     }
 }
