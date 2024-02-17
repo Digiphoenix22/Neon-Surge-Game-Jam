@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,11 +16,14 @@ public class PlayerController : MonoBehaviour
     public float currentSpeed; // Variable to store the current speed
 
     public AudioClip sonicBoomReadyClip; // Assign this in the inspector
+    public AudioClip jumpSound; // Assign this in the inspector
+
     private AudioSource audioSource; // Assign or add an AudioSource component and assign this in Start()
     private bool sonicBoomAvailable = true;
     private float sonicBoomCooldown = 30f;
     private float lastSonicBoomTime = -30f; // Initialize to -cooldown so ability is available at start
 
+    public Image flashOverlay; // Assign this in the inspector
 
     public Rigidbody2D rb;
     private float movementInput;
@@ -40,6 +44,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
+            audioSource.PlayOneShot(jumpSound);
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -65,22 +70,32 @@ public class PlayerController : MonoBehaviour
             currentSpeedMultiplier = 1f;
         }
 
+
+
+
+        // sonic boom
+
          // Play the sound queue if the cooldown is over, the player is over the speed of 30, and the sound has not yet been played
-        if (Time.time - lastSonicBoomTime >= sonicBoomCooldown && currentSpeed > 30 && sonicBoomAvailable)
+         // Check if we can play the Sonic Boom ready sound queue
+        if (Time.time - lastSonicBoomTime >= sonicBoomCooldown && currentSpeed > 30)
+        {
+        if (!sonicBoomAvailable)
         {
             audioSource.PlayOneShot(sonicBoomReadyClip);
-            sonicBoomAvailable = false; // Prevent the sound from playing repeatedly
+            sonicBoomAvailable = true; // Prevent the sound from playing repeatedly
         }
-
         // Check for Sonic Boom input (e.g., pressing "S" key)
-        if (Input.GetKeyDown(KeyCode.S) && currentSpeed > 30 && Time.time - lastSonicBoomTime >= sonicBoomCooldown)
+        if (Input.GetKeyDown(KeyCode.F) && currentSpeed > 30 && Time.time - lastSonicBoomTime >= sonicBoomCooldown)
         {
             StartCoroutine(SupersonicBoom());
             lastSonicBoomTime = Time.time;
             sonicBoomAvailable = true; // The ability can be signaled as ready again after use
         }
+        }
+
     }
 
+        
     void FixedUpdate()
     {
         MovePlayer(movementInput);
@@ -164,21 +179,22 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator SupersonicBoom()
     {
-        // Invert colors for 0.1 seconds
-        Camera.main.gameObject.GetComponent<CameraFilterPack_Colors_Adjust_ColorRGB>().enabled = true;
-        KillAllEnemies();
-        yield return new WaitForSeconds(0.1f);
-        Camera.main.gameObject.GetComponent<CameraFilterPack_Colors_Adjust_ColorRGB>().enabled = false;
+    // Assume you have a method to invert colors on the screen
+    //InvertScreenColors(true);
+    KillAllEnemies();
+    yield return new WaitForSeconds(0.1f);
+    //InvertScreenColors(false);
 
-        // Start cooldown (handled in Update)
+    // Start cooldown (handled in Update)
     }
+
 
      void KillAllEnemies()
     {
         // Find all enemies in the scene and destroy them
-        foreach (var enemy in FindObjectsOfType<Enemy>()) // Assuming your enemies have an "Enemy" script
+        //foreach (var enemy in FindObjectsOfType<Enemy>()) // Assuming your enemies have an "Enemy" script
         {
-            Destroy(enemy.gameObject);
+       //     Destroy(enemy.gameObject);
         }
     }
 

@@ -8,15 +8,14 @@ public class CameraFollow : MonoBehaviour
     public Vector3 offset;
     public float smoothSpeed = 0.125f; // Adjust this value to change how quickly the camera catches up to the player
 
-    void LateUpdate()
+    void FixedUpdate()
     {
-        if (playerTransform != null)
+    if (playerTransform != null)
         {
-            Vector3 desiredPosition = playerTransform.position + offset;
-            Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-            transform.position = smoothedPosition;
-
-            // Optionally, you can also adjust the camera's rotation or other properties here
+        Vector3 desiredPosition = playerTransform.position + offset;
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.fixedDeltaTime);
+        transform.position = smoothedPosition;
         }
     }
+
 }
