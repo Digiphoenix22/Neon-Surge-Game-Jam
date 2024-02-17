@@ -10,7 +10,7 @@ public class PlayerMovement2D : MonoBehaviour
     public float jumpForce = 5f;
     public float bhopMultiplier = 1.1f;
     private float currentSpeedMultiplier = 1f;
-    private bool isGrounded;
+    public bool isGrounded;
 
     private Rigidbody2D rb;
     private float movementInput;
@@ -22,13 +22,11 @@ public class PlayerMovement2D : MonoBehaviour
 
     void Update()
     {
-        // Check if the player is on the ground
-        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1.1f, LayerMask.GetMask("Ground"));
 
         // Get horizontal movement input
         movementInput = Input.GetAxisRaw("Horizontal");
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
         }
@@ -83,6 +81,21 @@ public class PlayerMovement2D : MonoBehaviour
         {
             // Initial speed boost on first jump
             currentSpeedMultiplier = sprintMultiplier;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
+    }
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
         }
     }
 }
