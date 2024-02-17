@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     public float acceleration = 10f;
+    public int maxHealth = 10;
+    private int currentHealth;
     public float maxSpeed = 5f;
     public float sprintMultiplier = 1.5f;
     public float jumpForce = 5f;
@@ -31,7 +33,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        
+        currentHealth = maxHealth;
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -198,6 +200,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
-
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        currentHealth -= 1;
+    }
 }

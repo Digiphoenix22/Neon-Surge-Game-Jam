@@ -66,4 +66,9 @@ public class EnemyController : MonoBehaviour
             enemyRB.velocity /= 2 + 1;
         }
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        currentHealth -= 1;
+    }
 }
