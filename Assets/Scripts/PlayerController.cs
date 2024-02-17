@@ -10,7 +10,7 @@ public class PlayerMovement2D : MonoBehaviour
     public float jumpForce = 5f;
     public float bhopMultiplier = 1.1f;
     private float currentSpeedMultiplier = 1f;
-    public bool isGrounded;
+    private bool isGrounded;
 
     private Rigidbody2D rb;
     private float movementInput;
@@ -38,6 +38,14 @@ public class PlayerMovement2D : MonoBehaviour
         else
         {
             currentSpeedMultiplier = 1f;
+        }
+        
+        Sprint(Input.GetKey(KeyCode.LeftShift));
+
+        // Reset speed multiplier when grounded without jumping
+        if (isGrounded && !Input.GetKeyDown(KeyCode.Space))
+        {
+            ResetSpeedMultiplier();
         }
 
         // Reset speed multiplier when grounded without jumping
@@ -82,6 +90,7 @@ public class PlayerMovement2D : MonoBehaviour
             // Initial speed boost on first jump
             currentSpeedMultiplier = sprintMultiplier;
         }
+        ResetSpeedMultiplier();
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -90,6 +99,21 @@ public class PlayerMovement2D : MonoBehaviour
         {
             isGrounded = true;
         }
+    }
+    void Sprint(bool isSprinting)
+    {
+        if (isSprinting && isGrounded)
+        {
+            currentSpeedMultiplier = sprintMultiplier;
+        }
+        else if (!isSprinting)
+        {
+            ResetSpeedMultiplier();
+        }
+    }
+    void ResetSpeedMultiplier()
+    {
+        currentSpeedMultiplier = 1f;
     }
     private void OnCollisionExit2D(Collision2D other)
     {
