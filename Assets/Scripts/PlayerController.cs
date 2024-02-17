@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement2D : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public float acceleration = 10f;
     public float maxSpeed = 5f;
@@ -12,7 +12,7 @@ public class PlayerMovement2D : MonoBehaviour
     private float currentSpeedMultiplier = 1f;
     private bool isGrounded;
 
-    private Rigidbody2D rb;
+    public Rigidbody2D rb;
     private float movementInput;
 
     void Start()
