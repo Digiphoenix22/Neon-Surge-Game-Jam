@@ -16,6 +16,8 @@ public class ShotgunController : MonoBehaviour
     public float projectileForce = 20f; // The force at which the projectile is shot
     public int pelletsCount = 10; // Number of pellets per shot for the shotgun
     public float spreadAngle = 45f; // Spread angle of the shotgun blast
+    public AudioClip shootSound; // Sound to play when shooting
+
     public Transform playerTransform;
     void Update()
     {
@@ -47,6 +49,9 @@ public class ShotgunController : MonoBehaviour
     void Shoot()
     {
         if (isReloading) return; // Prevent shooting if currently reloading
+
+        // Play shoot sound
+        AudioSource.PlayClipAtPoint(shootSound, transform.position);
 
         for (int i = 0; i < pelletsCount; i++)
         {
