@@ -12,7 +12,7 @@ public class ProjectileBehavior : MonoBehaviour
         EnemyController enemy = collision.GetComponent<EnemyController>();
         if (enemy != null)
         {
-            enemy.TakeDamage(damage);
+            enemy.takeDamage(damage);
             Destroy(gameObject); // Optionally destroy the projectile on impact
         }
 }

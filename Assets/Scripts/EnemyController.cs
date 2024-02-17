@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
@@ -7,26 +8,33 @@ public class EnemyController : MonoBehaviour
     public int maxHealth = 10;
     private int currentHealth;
 
-    // Assuming you have a PlayerController script that you want to reference for some reason
-    public PlayerController player; // You might not need this unless it's used for specific interactions
+    public GameObject Player;
+    private PlayerController playerController; 
     private Rigidbody2D enemyRB;
 
-    public float detectionRange = 5f; // Example variable for detection range, assuming you want to use it later
+    private float detectionTime;
+
+    public float detectionRange = 5f; 
 
     void Start()
     {
-    
+        playerController = Player.GetComponent<PlayerController>();
         enemyRB = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
     }
 
     void Update()
     {
-        // Example usage of detectionRange, adjust as necessary
-        // enemyRB.velocity = player.rb.velocity; // This line was directly copying the player's velocity to the enemy, which might not be what you want
+        if (detection(transform, Player.transform, detectionRange))
+        {
+            // Do something when objects are in range
+            Debug.Log("Objects are in range!");
+            enemyRB.velocity = -playerController.rb.velocity;
+        }
+        setSpeed();
     }
 
-    public void TakeDamage(int damage)
+    public void takeDamage(int damage)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
@@ -39,5 +47,23 @@ public class EnemyController : MonoBehaviour
     {
         // Destroy the enemy or play death animation
         Destroy(gameObject);
+    }
+
+    bool detection(Transform thisTransform, Transform otherTransform, float range)
+    {
+        float distance = Vector3.Distance(thisTransform.position, otherTransform.position);
+        return distance <= range;
+    }
+
+    void setSpeed()
+    {
+        if (detection(transform, Player.transform, detectionRange))
+        {
+            enemyRB.velocity = -playerController.rb.velocity;
+        }
+        else
+        {
+            enemyRB.velocity /= 2 + 1;
+        }
     }
 }
