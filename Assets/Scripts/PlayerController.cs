@@ -71,6 +71,11 @@ public class PlayerController : MonoBehaviour
         {
             currentSpeedMultiplier = 1f;
         }
+        // DEBUG BUTTON
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+        OnPlayerDeath();
+        }
 
 
 
@@ -204,4 +209,16 @@ public class PlayerController : MonoBehaviour
     {
         currentHealth -= 1;
     }
+    public void OnPlayerDeath()
+    {
+    // Assuming you have a reference to the DeathScreenController
+    FindObjectOfType<DeathScreenController>().TriggerDeathScreen();
+    
+    // Disable player controls
+    GetComponent<PlayerController>().enabled = false; // Or any other way you handle disabling controls
+    }
+
+
+
+
 }
