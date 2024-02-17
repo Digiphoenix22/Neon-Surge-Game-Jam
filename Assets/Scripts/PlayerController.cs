@@ -11,6 +11,15 @@ public class PlayerController : MonoBehaviour
     public float bhopMultiplier = 1.1f;
     private float currentSpeedMultiplier = 1f;
     private bool isGrounded;
+    public bool isSprinting; // Flag to indicate sprinting state
+    public float currentSpeed; // Variable to store the current speed
+
+    public AudioClip sonicBoomReadyClip; // Assign this in the inspector
+    private AudioSource audioSource; // Assign or add an AudioSource component and assign this in Start()
+    private bool sonicBoomAvailable = true;
+    private float sonicBoomCooldown = 30f;
+    private float lastSonicBoomTime = -30f; // Initialize to -cooldown so ability is available at start
+
 
     public Rigidbody2D rb;
     private float movementInput;
@@ -18,6 +27,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -53,11 +64,27 @@ public class PlayerController : MonoBehaviour
         {
             currentSpeedMultiplier = 1f;
         }
+
+         // Play the sound queue if the cooldown is over, the player is over the speed of 30, and the sound has not yet been played
+        if (Time.time - lastSonicBoomTime >= sonicBoomCooldown && currentSpeed > 30 && sonicBoomAvailable)
+        {
+            audioSource.PlayOneShot(sonicBoomReadyClip);
+            sonicBoomAvailable = false; // Prevent the sound from playing repeatedly
+        }
+
+        // Check for Sonic Boom input (e.g., pressing "S" key)
+        if (Input.GetKeyDown(KeyCode.S) && currentSpeed > 30 && Time.time - lastSonicBoomTime >= sonicBoomCooldown)
+        {
+            StartCoroutine(SupersonicBoom());
+            lastSonicBoomTime = Time.time;
+            sonicBoomAvailable = true; // The ability can be signaled as ready again after use
+        }
     }
 
     void FixedUpdate()
     {
         MovePlayer(movementInput);
+        currentSpeed = rb.velocity.magnitude; // Update the current speed
     }
 
     void MovePlayer(float direction)
@@ -102,15 +129,18 @@ public class PlayerController : MonoBehaviour
     }
     void Sprint(bool isSprinting)
     {
+        this.isSprinting = isSprinting; // Update the flag
+
         if (isSprinting && isGrounded)
         {
             currentSpeedMultiplier = sprintMultiplier;
         }
-        else if (!isSprinting)
+        else
         {
             ResetSpeedMultiplier();
         }
     }
+
     void ResetSpeedMultiplier()
     {
         currentSpeedMultiplier = 1f;
@@ -122,4 +152,36 @@ public class PlayerController : MonoBehaviour
             isGrounded = false;
         }
     }
+
+    void OnGUI()
+    {
+        // Display a label for sprinting status
+        GUI.Label(new Rect(10, 10, 200, 20), "Is Sprinting: " + isSprinting);
+
+        // Display a label for current speed
+        GUI.Label(new Rect(10, 30, 200, 20), "Current Speed: " + currentSpeed.ToString("F2"));
+    }
+
+    IEnumerator SupersonicBoom()
+    {
+        // Invert colors for 0.1 seconds
+        Camera.main.gameObject.GetComponent<CameraFilterPack_Colors_Adjust_ColorRGB>().enabled = true;
+        KillAllEnemies();
+        yield return new WaitForSeconds(0.1f);
+        Camera.main.gameObject.GetComponent<CameraFilterPack_Colors_Adjust_ColorRGB>().enabled = false;
+
+        // Start cooldown (handled in Update)
+    }
+
+     void KillAllEnemies()
+    {
+        // Find all enemies in the scene and destroy them
+        foreach (var enemy in FindObjectsOfType<Enemy>()) // Assuming your enemies have an "Enemy" script
+        {
+            Destroy(enemy.gameObject);
+        }
+    }
+
+
+
 }
