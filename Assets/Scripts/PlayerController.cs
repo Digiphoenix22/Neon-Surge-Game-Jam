@@ -1,231 +1,124 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Movement Properties")]
     public float acceleration = 10f;
+    public float currentSpeed; // Ensure this declaration exists
 
-    public int maxHealth = 10;
-    public int currentHealth;
-    public bool ifDead;
-
-    public float maxSpeed = 5f;
+    public float baseSpeed = 5f; // Base walking speed
+    public float maxSpeed = 5f; // Max speed for bhopping
     public float sprintMultiplier = 1.5f;
     public float jumpForce = 5f;
     public float bhopMultiplier = 1.1f;
     private float currentSpeedMultiplier = 1f;
     private bool isGrounded;
-    public bool isSprinting; // Flag to indicate sprinting state
-    public float currentSpeed; // Variable to store the current speed
+    public bool isSprinting;
+    public bool isCrouching = false;
+    public float crouchMultiplier = 0.5f;
 
-    public AudioClip sonicBoomReadyClip; // Assign this in the inspector
-    public AudioClip jumpSound; // Assign this in the inspector
+    [Header("Player Health")]
+    public int maxHealth = 10;
+    private int currentHealth;
 
-    private AudioSource audioSource; // Assign or add an AudioSource component and assign this in Start()
+    [Header("Audio")]
+    public AudioClip sonicBoomReadyClip;
+    public AudioClip jumpSound;
+    private AudioSource audioSource;
+
+    [Header("UI")]
+    public Image flashOverlay; // Optional for effects like sonic boom
+    public Rigidbody2D rb; // Readonly property for external access
+    private float movementInput;
     private bool sonicBoomAvailable = true;
     private float sonicBoomCooldown = 30f;
-    private float lastSonicBoomTime = -30f; // Initialize to -cooldown so ability is available at start
-
-    public Image flashOverlay; // Assign this in the inspector
-
-    public Rigidbody2D rb;
-    private float movementInput;
+    private float lastSonicBoomTime = -30f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
         audioSource = GetComponent<AudioSource>();
-        ifDead = false;
     }
 
     void Update()
     {
-
-        // Get horizontal movement input
-        movementInput = Input.GetAxisRaw("Horizontal");
-
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            Jump();
-            audioSource.PlayOneShot(jumpSound);
-        }
-
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            currentSpeedMultiplier = sprintMultiplier;
-        }
-        else
-        {
-            currentSpeedMultiplier = 1f;
-        }
-        
-        Sprint(Input.GetKey(KeyCode.LeftShift));
-
-        // Reset speed multiplier when grounded without jumping
-        if (isGrounded && !Input.GetKeyDown(KeyCode.Space))
-        {
-            ResetSpeedMultiplier();
-        }
-
-        // Reset speed multiplier when grounded without jumping
-        if (isGrounded && !Input.GetKeyDown(KeyCode.Space))
-        {
-            currentSpeedMultiplier = 1f;
-        }
-        if (currentHealth <= 0) 
-        {
-            ifDead = true;
-            OnPlayerDeath();
-        }
-
-
-
-
-        // sonic boom
-
-         // Play the sound queue if the cooldown is over, the player is over the speed of 30, and the sound has not yet been played
-         // Check if we can play the Sonic Boom ready sound queue
-        if (Time.time - lastSonicBoomTime >= sonicBoomCooldown && currentSpeed > 30)
-        {
-        if (!sonicBoomAvailable)
-        {
-            audioSource.PlayOneShot(sonicBoomReadyClip);
-            sonicBoomAvailable = true; // Prevent the sound from playing repeatedly
-        }
-        // Check for Sonic Boom input (e.g., pressing "S" key)
-        if (Input.GetKeyDown(KeyCode.F) && currentSpeed > 30 && Time.time - lastSonicBoomTime >= sonicBoomCooldown)
-        {
-            StartCoroutine(SupersonicBoom());
-            lastSonicBoomTime = Time.time;
-            sonicBoomAvailable = true; // The ability can be signaled as ready again after use
-        }
-        }
-
+        HandleInput();
+        HandleSonicBoom();
     }
 
-        
     void FixedUpdate()
     {
-        MovePlayer(movementInput);
-        currentSpeed = rb.velocity.magnitude; // Update the current speed
+        HandleMovement();
+        currentSpeed = rb.velocity.magnitude;
+    }
+
+    void HandleInput()
+    {
+        isCrouching = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.C);
+        movementInput = Input.GetAxisRaw("Horizontal");
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded) Jump();
+        currentSpeedMultiplier = Input.GetKey(KeyCode.LeftShift) ? sprintMultiplier : 1f;
+        if (Input.GetKeyDown(KeyCode.K)) OnPlayerDeath(); // Debug death
+    }
+
+    void HandleMovement()
+    {
+        if (!isCrouching) MovePlayer(movementInput);
+        else ApplyMomentum(movementInput);
     }
 
     void MovePlayer(float direction)
     {
-        if (Mathf.Abs(rb.velocity.x) < maxSpeed * currentSpeedMultiplier)
-        {
-            rb.AddForce(new Vector2(direction * acceleration, 0f), ForceMode2D.Force);
-        }
+        rb.velocity = new Vector2(direction * baseSpeed * currentSpeedMultiplier, rb.velocity.y);
+    }
 
-        // Implement momentum by limiting speed only when above maxSpeed
-        if (Mathf.Abs(rb.velocity.x) > maxSpeed * currentSpeedMultiplier)
+    void ApplyMomentum(float direction)
+    {
+        if (Mathf.Abs(rb.velocity.x) < maxSpeed)
         {
-            rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed * currentSpeedMultiplier, rb.velocity.y);
+            rb.AddForce(new Vector2(direction * acceleration, 0) * crouchMultiplier, ForceMode2D.Force);
         }
     }
 
     void Jump()
     {
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-        
-        if (currentSpeedMultiplier > 1f)
-        {
-            // Increase speed multiplier on successful bhop
-            currentSpeedMultiplier *= bhopMultiplier;
-            // Ensure the speed multiplier doesn't exceed a maximum threshold to prevent unlimited acceleration
-            currentSpeedMultiplier = Mathf.Min(currentSpeedMultiplier, sprintMultiplier * 2);
-        }
-        else
-        {
-            // Initial speed boost on first jump
-            currentSpeedMultiplier = sprintMultiplier;
-        }
-        ResetSpeedMultiplier();
+        float jumpStrength = isCrouching ? jumpForce * 1.1f : jumpForce;
+        rb.AddForce(Vector2.up * jumpStrength, ForceMode2D.Impulse);
+        audioSource.PlayOneShot(jumpSound);
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    void HandleSonicBoom()
     {
-        if (other.gameObject.CompareTag("Ground"))
+        if (Time.time - lastSonicBoomTime >= sonicBoomCooldown && currentSpeed > 30 && Input.GetKeyDown(KeyCode.F))
         {
-            isGrounded = true;
+            StartCoroutine(SupersonicBoom());
+            lastSonicBoomTime = Time.time;
         }
-    }
-    void Sprint(bool isSprinting)
-    {
-        this.isSprinting = isSprinting; // Update the flag
-
-        if (isSprinting && isGrounded)
-        {
-            currentSpeedMultiplier = sprintMultiplier;
-        }
-        else
-        {
-            ResetSpeedMultiplier();
-        }
-    }
-
-    void ResetSpeedMultiplier()
-    {
-        currentSpeedMultiplier = 1f;
-    }
-    private void OnCollisionExit2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
-        }
-    }
-
-    void OnGUI()
-    {
-        // Display a label for sprinting status
-        GUI.Label(new Rect(10, 10, 200, 20), "Is Sprinting: " + isSprinting);
-
-        // Display a label for current speed
-        GUI.Label(new Rect(10, 30, 200, 20), "Current Speed: " + currentSpeed.ToString("F2"));
     }
 
     IEnumerator SupersonicBoom()
     {
-    // Assume you have a method to invert colors on the screen
-    //InvertScreenColors(true);
-    KillAllEnemies();
-    yield return new WaitForSeconds(0.1f);
-    //InvertScreenColors(false);
-
-    // Start cooldown (handled in Update)
+        // Sonic boom logic here
+        yield return new WaitForSeconds(0.1f);
     }
 
-
-     void KillAllEnemies()
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        // Find all enemies in the scene and destroy them
-        //foreach (var enemy in FindObjectsOfType<Enemy>()) // Assuming your enemies have an "Enemy" script
-        {
-       //     Destroy(enemy.gameObject);
-        }
+        if (other.gameObject.CompareTag("Ground")) isGrounded = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionExit2D(Collision2D other)
     {
-        if (collision.CompareTag("Enemy"))
-        {
-            currentHealth -= 1;
-        }
+        if (other.gameObject.CompareTag("Ground")) isGrounded = false;
     }
+
     public void OnPlayerDeath()
     {
-    // Assuming you have a reference to the DeathScreenController
-    FindObjectOfType<DeathScreenController>().TriggerDeathScreen();
-    
-    // Disable player controls
-    GetComponent<PlayerController>().enabled = false; // Or any other way you handle disabling controls
+        FindObjectOfType<DeathScreenController>().TriggerDeathScreen();
+        this.enabled = false; // Disable this script to stop player control
     }
-
-
-
-
 }
