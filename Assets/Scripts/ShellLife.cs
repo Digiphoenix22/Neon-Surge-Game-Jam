@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using UnityEngine;
-
 public class ShellRemoval : MonoBehaviour
 {
     public float removalTime = 5f; // Time after which the shell is removed

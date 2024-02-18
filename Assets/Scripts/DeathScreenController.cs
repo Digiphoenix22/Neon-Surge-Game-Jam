@@ -7,9 +7,9 @@ using TMPro;
 
 public class DeathScreenController : MonoBehaviour
 {
-    public TextMeshProUGUI restartText; // Assign this in the inspector
+    public TextMeshProUGUI restartText; 
 
-    
+    public PlayerController playerController;
 
 
     public float fadeInTime = 2f;
@@ -23,17 +23,15 @@ public class DeathScreenController : MonoBehaviour
     {
         deathScreenImage = GetComponent<Image>();
         deathScreenImage.color = new Color(deathScreenImage.color.r, deathScreenImage.color.g, deathScreenImage.color.b, 0);
+        playerController = GetComponent<PlayerController>();
+
     }
 
     void Update()
     {
         if (isDead)
         {
-            // Check for 'R' to restart the level
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            }
+            
         }
     }
 
@@ -41,12 +39,15 @@ public class DeathScreenController : MonoBehaviour
     {
     isDead = true;
     StartCoroutine(FadeInDeathScreen());
-    StartCoroutine(FadeInDeathMessage()); // Make sure this is called if intended
+    StartCoroutine(FadeInDeathMessage()); 
     }
 
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 
-
-    IEnumerator FadeInDeathScreen()
+IEnumerator FadeInDeathScreen()
     {
     float targetAlpha = 0.7f; // Target alpha value
     float timer = 0;
@@ -75,5 +76,4 @@ public class DeathScreenController : MonoBehaviour
         restartText.color = new Color(restartText.color.r, restartText.color.g, restartText.color.b, 1f);
         }
     }
-
 }

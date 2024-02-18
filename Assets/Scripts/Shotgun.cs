@@ -18,15 +18,24 @@ public class ShotgunController : MonoBehaviour
     public float spreadAngle = 45f; // Spread angle of the shotgun blast
     public AudioClip shootSound; // Sound to play when shooting
 
-    public Transform playerTransform;
+    public GameObject Player;
+    public PlayerController PlayerController;
+    private void Start()
+    {
+
+        Player.GetComponent<PlayerController>().enabled = true;
+    }
     void Update()
     {
-        AimAndFloatTowardsCursor();
+        if (PlayerController.ifDead == false)
+        {
+            AimAndFloatTowardsCursor();
 
-    if (Input.GetMouseButtonDown(0)) // Left mouse button
-    {
-        Shoot();
-    }
+            if (Input.GetMouseButtonDown(0)) // Left mouse button
+            {
+                Shoot();
+            }
+        }
     }
 
 
@@ -38,7 +47,7 @@ public class ShotgunController : MonoBehaviour
     transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
     // Calculate the desired floating position
-    Vector2 playerPosition = playerTransform.position; // Ensure you have a reference to the player's transform
+    Vector2 playerPosition = Player.transform.position; 
     Vector2 floatPosition = playerPosition + direction.normalized * floatDistance;
 
     // Smoothly move the shotgun to the floating position

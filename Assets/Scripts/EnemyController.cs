@@ -6,7 +6,7 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     public int maxHealth = 10;
-    private int currentHealth;
+    public int currentHealth;
 
     public GameObject Player;
     private PlayerController playerController; 

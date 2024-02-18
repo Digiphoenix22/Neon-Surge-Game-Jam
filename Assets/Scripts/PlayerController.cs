@@ -6,8 +6,11 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     public float acceleration = 10f;
+
     public int maxHealth = 10;
     private int currentHealth;
+    public bool ifDead;
+
     public float maxSpeed = 5f;
     public float sprintMultiplier = 1.5f;
     public float jumpForce = 5f;
@@ -35,6 +38,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
         audioSource = GetComponent<AudioSource>();
+        ifDead = false;
     }
 
     void Update()
@@ -75,6 +79,11 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.K))
         {
         OnPlayerDeath();
+        }
+        if (currentHealth <= 0) 
+        {
+            ifDead = true;
+            OnPlayerDeath();
         }
 
 
@@ -207,7 +216,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        currentHealth -= 1;
+        if (collision.CompareTag("Enemy"))
+        {
+            currentHealth -= 1;
+        }
     }
     public void OnPlayerDeath()
     {
