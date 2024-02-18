@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using UnityEngine.Audio;
 public class MusicManager : MonoBehaviour
 {
     public static MusicManager Instance { get; private set; }
