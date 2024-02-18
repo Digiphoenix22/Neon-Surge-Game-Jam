@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     private float lastSonicBoomTime = -30f; // Initialize to -cooldown so ability is available at start
 
     public Image flashOverlay; // Assign this in the inspector
+    public bool isCrouching = false;
+    public float crouchMultiplier = 0.5f; // Adjust the player's speed when crouching
+
 
     public Rigidbody2D rb;
     private float movementInput;
@@ -39,6 +42,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+         // Check for crouch input
+        isCrouching = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.C); // Example keys for crouchin
 
         // Get horizontal movement input
         movementInput = Input.GetAxisRaw("Horizontal");
@@ -47,6 +52,12 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
             audioSource.PlayOneShot(jumpSound);
+        }
+
+        // Apply different movement handling based on crouching
+        if (isCrouching)
+        {
+            // Handle crouch-specific logic here
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -105,9 +116,30 @@ public class PlayerController : MonoBehaviour
         
     void FixedUpdate()
     {
+    if (!isCrouching)
+    {
+        // Snappy, direct control movement
         MovePlayer(movementInput);
-        currentSpeed = rb.velocity.magnitude; // Update the current speed
     }
+    else
+    {
+        // Momentum-based movement for bhopping
+        ApplyMomentum(movementInput);
+    }
+    currentSpeed = rb.velocity.magnitude;
+    }
+
+    void ApplyMomentum(float direction)
+    {
+    // Apply a more momentum-conserving movement force
+    if (Mathf.Abs(rb.velocity.x) < maxSpeed * currentSpeedMultiplier)
+    {
+        rb.AddForce(new Vector2(direction * acceleration, 0f) * crouchMultiplier, ForceMode2D.Force);
+    }
+
+    // Optional: Increase maxSpeed limit or modify handling to preserve momentum while crouching
+    }
+
 
     void MovePlayer(float direction)
     {
@@ -125,22 +157,40 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-        
+    float jumpStrength = jumpForce;
+    if (isCrouching)
+    {
+        // Optionally increase jump strength or modify it based on crouching
+        jumpStrength *= 1.1f; // Example: slightly increase jump force when crouching
+    }
+
+    // Apply the calculated jump force
+    rb.AddForce(Vector2.up * jumpStrength, ForceMode2D.Impulse);
+
+    // Below, the logic for modifying speed multiplier during a jump
+    if (isCrouching && isGrounded)
+    {
+        // This condition checks if the player is crouching and grounded to apply bhopping mechanics
         if (currentSpeedMultiplier > 1f)
         {
             // Increase speed multiplier on successful bhop
             currentSpeedMultiplier *= bhopMultiplier;
-            // Ensure the speed multiplier doesn't exceed a maximum threshold to prevent unlimited acceleration
+            // Ensure the speed multiplier doesn't exceed a maximum threshold
             currentSpeedMultiplier = Mathf.Min(currentSpeedMultiplier, sprintMultiplier * 2);
         }
         else
         {
-            // Initial speed boost on first jump
+            // Initial speed boost on first jump, potentially modified for crouching
             currentSpeedMultiplier = sprintMultiplier;
         }
+    }
+    else
+    {
+        // If not crouching or not aiming for bhopping mechanics, reset or adjust as needed
         ResetSpeedMultiplier();
     }
+    }   
+
 
     private void OnCollisionEnter2D(Collision2D other)
     {
