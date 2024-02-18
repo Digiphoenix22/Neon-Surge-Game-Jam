@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     public float acceleration = 10f;
 
     public int maxHealth = 10;
-    private int currentHealth;
+    public int currentHealth;
     public bool ifDead;
 
     public float maxSpeed = 5f;
@@ -74,11 +74,6 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && !Input.GetKeyDown(KeyCode.Space))
         {
             currentSpeedMultiplier = 1f;
-        }
-        // DEBUG BUTTON
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-        OnPlayerDeath();
         }
         if (currentHealth <= 0) 
         {

@@ -977,9 +977,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 887392055}
-  - {fileID: 1138077031}
-  - {fileID: 1197043431}
+  - {fileID: 1763545521}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1166,7 +1164,6 @@ GameObject:
   - component: {fileID: 887392055}
   - component: {fileID: 887392058}
   - component: {fileID: 887392057}
-  - component: {fileID: 887392056}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -1181,34 +1178,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 887392054}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 652429527}
+  m_Father: {fileID: 1763545521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.011669, y: -0.000076294}
+  m_AnchoredPosition: {x: 959.98834, y: 539.99994}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &887392056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 887392054}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3543f0f4d7569a447ad8a6841c273611, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  restartText: {fileID: 1138077032}
-  playerController: {fileID: 0}
-  fadeInTime: 2
-  deathMessageText: {fileID: 0}
 --- !u!114 &887392057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1406,16 +1387,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1138077030}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 652429527}
+  m_Father: {fileID: 1763545521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -843, y: -553}
+  m_AnchoredPosition: {x: 117, y: -13}
   m_SizeDelta: {x: 201, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1138077032
@@ -1625,17 +1606,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1197043430}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1058976946}
-  m_Father: {fileID: 652429527}
+  m_Father: {fileID: 1763545521}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.011636, y: -399}
+  m_AnchoredPosition: {x: 959.98834, y: 141}
   m_SizeDelta: {x: 424.8643, y: 179.6893}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1197043432
@@ -1682,7 +1663,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 887392056}
+      - m_Target: {fileID: 1763545522}
         m_TargetAssemblyTypeName: DeathScreenController, Assembly-CSharp
         m_MethodName: RestartLevel
         m_Mode: 1
@@ -1909,7 +1890,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 10
-  maxHealth: 10
+  maxHealth: 1
+  currentHealth: 0
   ifDead: 0
   maxSpeed: 50
   sprintMultiplier: 2
@@ -2289,6 +2271,7 @@ GameObject:
   - component: {fileID: 1763545521}
   - component: {fileID: 1763545520}
   - component: {fileID: 1763545519}
+  - component: {fileID: 1763545522}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -2339,13 +2322,34 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1763545518}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -960, y: -540, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
+  m_Children:
+  - {fileID: 887392055}
+  - {fileID: 1138077031}
+  - {fileID: 1197043431}
+  m_Father: {fileID: 652429527}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1763545522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1763545518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3543f0f4d7569a447ad8a6841c273611, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  restartText: {fileID: 1058976947}
+  playerController: {fileID: 1462130790}
+  fadeInTime: 2
+  deathScreenImage: {fileID: 887392057}
+  deathMessageText: {fileID: 0}
+  button: {fileID: 1197043430}
 --- !u!1 &1784845037
 GameObject:
   m_ObjectHideFlags: 0
@@ -2665,5 +2669,4 @@ SceneRoots:
   - {fileID: 1462130789}
   - {fileID: 440324973}
   - {fileID: 652429527}
-  - {fileID: 1763545521}
   - {fileID: 6572723113526893667}

@@ -13,25 +13,25 @@ public class DeathScreenController : MonoBehaviour
 
 
     public float fadeInTime = 2f;
-    private Image deathScreenImage;
+    public Image deathScreenImage;
     private bool isDead = false;
 
     public Text deathMessageText;
+    public GameObject button;
 
 
     void Start()
     {
-        deathScreenImage = GetComponent<Image>();
         deathScreenImage.color = new Color(deathScreenImage.color.r, deathScreenImage.color.g, deathScreenImage.color.b, 0);
-        playerController = GetComponent<PlayerController>();
-
+        button.SetActive(false);
     }
 
     void Update()
     {
         if (isDead)
         {
-            
+            button.SetActive(true);
+            playerController.ifDead = true;
         }
     }
 
