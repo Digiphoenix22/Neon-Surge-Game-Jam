@@ -1890,7 +1890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 10
-  maxHealth: 1
+  maxHealth: 10
   currentHealth: 0
   ifDead: 0
   maxSpeed: 50

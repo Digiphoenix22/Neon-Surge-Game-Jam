@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
@@ -9,12 +6,11 @@ public class EnemyController : MonoBehaviour
     public int currentHealth;
 
     public GameObject Player;
-    private PlayerController playerController; 
+    private PlayerController playerController;
     private Rigidbody2D enemyRB;
 
-    private float detectionTime;
-
-    public float detectionRange = 5f; 
+    public float detectionRange = 5f;
+    public Vector2 followSpeed; // Customizable speed for following the player
 
     void Start()
     {
@@ -25,13 +21,25 @@ public class EnemyController : MonoBehaviour
 
     void Update()
     {
-        if (detection(transform, Player.transform, detectionRange))
+        // Check if player is within detection range
+        if (IsPlayerInRange())
         {
-            // Do something when objects are in range
-            Debug.Log("Objects are in range!");
-            enemyRB.velocity = -playerController.rb.velocity;
+            // Move towards the player using the follow speed
+            Vector3 direction = (Player.transform.position - transform.position).normalized;
+            enemyRB.velocity = (direction * (playerController.rb.velocity * 2));
         }
-        setSpeed();
+        else
+        {
+            // If player is not in range, stop moving
+            enemyRB.velocity = Vector2.zero;
+        }
+    }
+
+    bool IsPlayerInRange()
+    {
+        // Check if the distance between enemy and player is within the detection range
+        float distance = Vector3.Distance(transform.position, Player.transform.position);
+        return distance <= detectionRange;
     }
 
     public void takeDamage(int damage)
@@ -49,26 +57,9 @@ public class EnemyController : MonoBehaviour
         Destroy(gameObject);
     }
 
-    bool detection(Transform thisTransform, Transform otherTransform, float range)
-    {
-        float distance = Vector3.Distance(thisTransform.position, otherTransform.position);
-        return distance <= range;
-    }
-
-    void setSpeed()
-    {
-        if (detection(transform, Player.transform, detectionRange))
-        {
-            enemyRB.velocity = -playerController.rb.velocity;
-        }
-        else
-        {
-            enemyRB.velocity /= 2 + 1;
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // Reduce health if collided with another object (e.g., a projectile)
         currentHealth -= 1;
     }
 }
