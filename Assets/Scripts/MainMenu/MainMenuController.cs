@@ -53,7 +53,7 @@ public class MainMenuController : MonoBehaviour
 
     void PlayGame()
     {
-        SceneManager.LoadScene("GameScene"); // Replace "GameScene" with your game scene's name
+        SceneManager.LoadScene("Level1"); // Replace "GameScene" with your game scene's name
     }
 
     void OpenOptions()
