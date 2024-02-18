@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 using UnityEngine.SceneManagement; // For loading scenes
 
 public class LevelTrigger : MonoBehaviour
 {
     public string nextLevelName; // The name of the next level to load
     public GameObject winScreen; // Reference to the win screen UI element
+    public CameraFollow cameraFollowScript; // Reference to the camera follow script
 
     private void Start()
     {
@@ -22,10 +22,9 @@ public class LevelTrigger : MonoBehaviour
             // Show the win screen
             if (winScreen) winScreen.SetActive(true);
             
-            // Optionally wait for a few seconds or wait for player input before loading the next level
-            // For simplicity, here we'll just load the next level directly
-            // Consider using a coroutine if you want a delay
-            Invoke("LoadNextLevel", 2f); // Adjust the delay as needed
+            // Freeze the camera by disabling its follow script
+            if (cameraFollowScript) cameraFollowScript.enabled = false;
+            
         }
     }
 
