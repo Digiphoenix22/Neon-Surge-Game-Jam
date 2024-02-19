@@ -12,8 +12,8 @@ public class ProjectileBehavior : MonoBehaviour
         EnemyController enemy = collision.GetComponent<EnemyController>();
         if (enemy != null)
         {
-            enemy.takeDamage(damage);
-            Destroy(gameObject); // Optionally destroy the projectile on impact
+            enemy.TakeDamage(damage); // Correct the method call to match the case
+            Destroy(gameObject); // Destroy the projectile on impact
         }
-}
+    }
 }

@@ -3,72 +3,107 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+
 public class EnemyController : MonoBehaviour
 {
-    public int maxHealth = 10;
-    private int currentHealth;
-
-    public GameObject Player;
-    private PlayerController playerController; 
+    public GameObject player;
+    private PlayerController playerController;
     private Rigidbody2D enemyRB;
 
-    private float detectionTime;
+    [Header("Health Settings")]
+    [SerializeField] private int currentHealth = 1;
 
-    public float detectionRange = 5f; 
+    [Header("Movement Settings")]
+    public float acceleration = 20f;
+    public float maxSpeed = 10f;
+    public float lockOnRadius = 5f;
+
+    [Header("Combat Settings")]
+    public float bounceForce = 2f; // Use this for bouncing off collisions
+    public AudioClip HitSound;
+
+    private AudioSource audioSource;
 
     void Start()
     {
-        playerController = Player.GetComponent<PlayerController>();
+        playerController = player.GetComponent<PlayerController>();
         enemyRB = GetComponent<Rigidbody2D>();
-        currentHealth = maxHealth;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
     {
-        if (detection(transform, Player.transform, detectionRange))
+        float distanceToPlayer = Vector2.Distance(transform.position, player.transform.position);
+        if (distanceToPlayer <= lockOnRadius)
         {
-            // Do something when objects are in range
-            Debug.Log("Objects are in range!");
-            enemyRB.velocity = -playerController.rb.velocity;
+            Vector2 direction = (player.transform.position - transform.position).normalized;
+            enemyRB.AddForce(direction * acceleration);
+
+            if (enemyRB.velocity.magnitude > maxSpeed)
+            {
+                enemyRB.velocity = enemyRB.velocity.normalized * maxSpeed;
+            }
         }
-        setSpeed();
     }
 
-    public void takeDamage(int damage)
+    public AudioClip deathSound; // Assign in the inspector
+
+    public void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        if (currentHealth <= 0)
+        
+        // Check if enemy is still alive to play the hit sound
+        if(currentHealth > 0)
         {
-            Die();
-        }
-    }
-
-    void Die()
-    {
-        // Destroy the enemy or play death animation
-        Destroy(gameObject);
-    }
-
-    bool detection(Transform thisTransform, Transform otherTransform, float range)
-    {
-        float distance = Vector3.Distance(thisTransform.position, otherTransform.position);
-        return distance <= range;
-    }
-
-    void setSpeed()
-    {
-        if (detection(transform, Player.transform, detectionRange))
-        {
-            enemyRB.velocity = -playerController.rb.velocity;
+            if(audioSource && HitSound)
+            {
+                audioSource.PlayOneShot(HitSound);
+            }
         }
         else
         {
-            enemyRB.velocity /= 2 + 1;
+            // Enemy dies, play death sound instead
+            if(audioSource && deathSound)
+            {
+                audioSource.PlayOneShot(deathSound);
+                // Consider delaying the destruction if you want the death sound to play fully
+                Destroy(gameObject, deathSound.length);
+            }
+            else
+            {
+                // If there's no death sound or audio source, destroy immediately
+                Destroy(gameObject);
+            }
         }
-    }
+}
+
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        currentHealth -= 1;
+        if (collision.CompareTag("Player"))
+        {
+            playerController.TakeDamage(1);
+
+            Vector2 direction = transform.position - collision.transform.position;
+            enemyRB.AddForce(direction.normalized * bounceForce, ForceMode2D.Impulse);
+
+            enemyRB.velocity *= 0.5f;
+        }
+        else if (collision.CompareTag("Projectile"))
+        {
+            
+            TakeDamage(1);
+        }
+    }
+
+    // Respond to collisions with ground
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            Vector2 bounceDirection = collision.contacts[0].normal; // Get the normal of the collision point
+            enemyRB.AddForce(bounceDirection * bounceForce, ForceMode2D.Impulse); // Apply force in the bounce direction
+        }
     }
 }
