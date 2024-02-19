@@ -2,6 +2,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Audio;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -30,12 +32,15 @@ public class PlayerController : MonoBehaviour
 
     [Header("Player Health")]
     public int maxHealth = 10;
-    private int currentHealth;
+    public int currentHealth;
 
     [Header("Audio")]
     public AudioClip sonicBoomReadyClip;
     public AudioClip jumpSound;
+    public AudioClip BhopJumpSound;
     private AudioSource audioSource;
+    public AudioMixerGroup soundEffectsMixerGroup; 
+
 
     [Header("UI")]
     public Image flashOverlay;
@@ -54,6 +59,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Animation")]
     public Animator animator;
+
+    [Header("Damage/Combat")]
+    public bool ifDead;
     
 
     void Start()
@@ -63,9 +71,8 @@ public class PlayerController : MonoBehaviour
         if (!animator) animator = GetComponent<Animator>();
         currentHealth = maxHealth;
         audioSource = GetComponent<AudioSource>();
+        audioSource.outputAudioMixerGroup = soundEffectsMixerGroup; // Assign the mixer group
         audioSource.pitch = 1.0f;
-        animator = GetComponent<Animator>();
-        rb = GetComponent<Rigidbody2D>();
     }
 
     
@@ -75,6 +82,7 @@ public class PlayerController : MonoBehaviour
         HandleInput();
         HandleSonicBoom();
         HandleAnimation();
+        
     }
 
     void FixedUpdate()
@@ -145,10 +153,11 @@ public class PlayerController : MonoBehaviour
 
     void PlayJumpSound(bool isBhop)
     {
+        float volume = 0.7f; 
         if (isBhop && bhopJumpSound)
         {
             audioSource.pitch = 1.0f + (pitchIncreaseFactor * Mathf.Min(consecutiveBhops, 5));
-            audioSource.PlayOneShot(bhopJumpSound);
+            audioSource.PlayOneShot(bhopJumpSound, volume);
         }
         else
         {
@@ -209,17 +218,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void TakeDamage(int damage)
+    {
+    currentHealth -= damage;
+    if (currentHealth <= 0)
+    {
+        OnPlayerDeath();
+        ifDead = true;
+    }
+    }
+
     public void OnPlayerDeath()
     {
         FindObjectOfType<DeathScreenController>().TriggerDeathScreen();
         this.enabled = false;
-    }
-
-    void OnGUI()
-    {
-        GUI.Label(new Rect(10, 10, 300, 20), $"Consecutive Bhops: {consecutiveBhops}");
-        GUI.Label(new Rect(10, 30, 300, 20), $"Is Grounded: {isGrounded}");
-        GUI.Label(new Rect(10, 50, 300, 20), $"Time Since Last Bhop: {timeSinceLastBhop:F2}");
+        
     }
 
     void HandleInput()
